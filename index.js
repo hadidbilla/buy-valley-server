@@ -18,17 +18,23 @@ const client = new MongoClient(uri, {
 client.connect((err) => {
   const items = client.db("buyValley").collection("items");
   const orders = client.db("buyValley").collection("orders");
+
+  /*----------- (Admin add product) ------------*/
   app.post("/addProducts", (req, res) => {
     const item = req.body;
     items.insertOne(item).then((result) => {
       res.send(result.insertedCount > 0);
     });
   });
+
+  /*------------ (Load all product in home page) --------*/
   app.get("/items", (req, res) => {
     items.find({}).toArray((err, documents) => {
       res.send(documents);
     });
   });
+
+  /*------------- (Load data By user email) ----------------*/
   app.get("/order", (req, res) => {
     console.log(req.query.email);
     orders.find({ email: req.query.email }).toArray((err, documents) => {
@@ -36,23 +42,26 @@ client.connect((err) => {
     });
   });
 
+  /*----------------- (Check order add on database) -----------*/
   app.post("/addOrder", (req, res) => {
     const order = req.body;
     orders.insertOne(order).then((result) => {
       res.send(result.insertedCount > 0);
     });
   });
+
+  /*----------------- (Show single product which product user click) -----------*/
   app.get("/checkout/:id", (req, res) => {
     const id = ObjectID(req.params.id);
     console.log(id);
     items.find({ _id: id }).toArray((err, documents) => {
       res.send(documents[0]);
-      console.log(documents);
     });
   });
+
+  /*----------------- (Admin delete item ) -----------*/
   app.delete("/deleteItem/:id", (req, res) => {
     const id = ObjectID(req.params.id);
-    console.log();
     items.deleteOne({ _id: id }).then((result) => console.log(result));
   });
 });
